@@ -13,7 +13,7 @@ my $m = 13;
 
 my $p_a_e = $s * $m;
 
-my ($years, $type) = @ARGV;
+my ($years, $type, $cash, $negotiate ) = @ARGV;
 
 if ( !defined $years || !defined $type ) {
 
@@ -23,22 +23,22 @@ if ( !defined $years || !defined $type ) {
 
 my $annum_costs = {
 	old => {
-		kasko 		=> 1300,
 		grazhdanska 	=> 360,
 		change_tyres	=> 220,  
 		road_tax	=> 100,
 		car_tax		=> 100, 
 		oil_change	=> 350, 
 		washing		=> 100, 
+		kasko		=> 1,
 	},
 	new => {
-		kasko 		=> 2000,
 		grazhdanska 	=> 360,
 		change_tyres	=> 220,  
 		road_tax	=> 100,
 		car_tax		=> 100, 
 		oil_change	=> 350, 
 		washing		=> 100, 
+		kasko		=> 1,
 	},
 };
 $annum_costs = $annum_costs->{$type};
@@ -57,7 +57,8 @@ my $initial_costs = {
 		register 	=> 300,
 		product_tax 	=> 125,
 		leasing 	=> 533,
-		initial		=> 41000,
+		initial		=> $negotiate ? 40500 : 41000,
+		notary		=> 600,
 	},
 	old => {
 		tyres 		=> 600,
@@ -86,6 +87,12 @@ $selling_price = $selling_price->{$type};
 my $monthly = 0;
 my $total = 0;
 
+if ( $cash) {
+
+	$initial_costs->{leasing} = 0;
+	$initial_costs->{notary} = 0;
+}
+
 foreach ( keys %$annum_costs ) {
 
 	if ( $_ ne 'kasko' ) {
@@ -98,12 +105,12 @@ foreach ( keys %$annum_costs ) {
 			2 => 0.15,
 			3 => 0.15,
 		};
-		my $mod = $type eq 'old' ? 5 : 0;
+		my $mod = $type eq 'old' ? 5 : $cash ? 2 : 0;
 
 		foreach my $i (1..$years) {
 
 			$depr_price -= $i == 1 ? 0 : $depr_price * ($coeff_tbl->{$i - 1 + $mod} || 0.1);
-			my $kasko = $depr_price * 0.05;
+			my $kasko = $depr_price * ( $cash ? 0.04 : 0.05 );
 			print $kasko, " for year $i\n";
 			$sum += $kasko;
 		}
