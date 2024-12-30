@@ -13,7 +13,7 @@ my $m = 13;
 
 my $p_a_e = $s * $m;
 
-my ($years, $type, $cash, $negotiate ) = @ARGV;
+my ($years, $type, $cash, $negotiate, $no_kasko ) = @ARGV;
 
 if ( !defined $years || !defined $type ) {
 
@@ -57,7 +57,7 @@ my $initial_costs = {
 		register 	=> 300,
 		product_tax 	=> 125,
 		leasing 	=> 533,
-		initial		=> $negotiate ? 40500 : 41000,
+		initial		=> $negotiate ? 39000 : 40000,
 		notary		=> 600,
 	},
 	old => {
@@ -98,6 +98,7 @@ foreach ( keys %$annum_costs ) {
 	if ( $_ ne 'kasko' ) {
 		$total += $annum_costs->{$_} * $years; 
 	} else {
+		next if $no_kasko;
 		my $sum = 0;
 		my $depr_price = $initial_costs->{initial};
 		my $coeff_tbl = {
